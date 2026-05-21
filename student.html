@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Results + Parent Remarks</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .header h1 { font-size: 1.8rem; }
+    .nav-link {
+      background: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .nav-link:hover { background: #2563eb; }
+    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+    .login-card, .results-card, .remarks-card {
+      background: white;
+      border-radius: 24px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+    h2 { border-left: 5px solid #3b82f6; padding-left: 1rem; margin-bottom: 1rem; }
+    select, button, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover { background: #2563eb; }
+    .logout-btn {
+      background: none;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      width: auto;
+      padding: 0.4rem 1rem;
+    }
+    .student-info {
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .student-detail {
+      background: white;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f1f5f9; }
+    .grade-A, .grade-B, .grade-C, .grade-D, .grade-E {
+      display: inline-block;
+      padding: 0.25rem 1rem;
+      border-radius: 40px;
+      font-weight: bold;
+    }
+    .grade-A { background: #d1fae5; color: #065f46; }
+    .grade-B { background: #dbeafe; color: #1e40af; }
+    .grade-C { background: #fed7aa; color: #9a3412; }
+    .grade-D { background: #fecaca; color: #991b1b; }
+    .grade-E { background: #fee2e2; color: #7f1d1d; }
+    .score-high { color: #059669; font-weight: bold; }
+    .score-low { color: #dc2626; font-weight: bold; }
+    .summary {
+      background: #eff6ff;
+      padding: 1rem;
+      border-radius: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .summary-item {
+      background: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 16px;
+      text-align: center;
+      flex: 1;
+    }
+    .remarks-list { max-height: 250px; overflow-y: auto; margin-top: 1rem; }
+    .remark-item {
+      background: #f8fafc;
+      border-left: 4px solid #3b82f6;
+      padding: 0.8rem;
+      margin-bottom: 0.8rem;
+      border-radius: 12px;
+    }
+    .remark-date { font-size: 0.7rem; color: #64748b; }
+    .hidden { display: none; }
+    @media (max-width: 640px) {
+      .container { padding: 0 1rem; }
+      .login-card, .results-card, .remarks-card { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>📚 Student Results Portal</h1>
+  <a href="teacher.html" class="nav-link">👩‍🏫 Teacher Dashboard →</a>
+</div>
+<div class="container">
+  <div id="loginSection" class="login-card">
+    <h2>🔐 Student Login</h2>
+    <select id="studentSelect">
+      <option value="">-- Choose a student --</option>
+      <option value="1">Aisha Mohamed (Grade 8)</option>
+      <option value="2">Brian Omondi (Grade 8)</option>
+      <option value="3">Cynthia Wanjiku (Grade 8)</option>
+      <option value="4">David Mwangi (Grade 8)</option>
+    </select>
+    <button id="loginBtn">View My Results →</button>
+  </div>
+  <div id="resultsSection" class="hidden">
+    <div class="results-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>📊 My Performance</h2>
+        <button id="logoutBtn" class="logout-btn">← Logout</button>
+      </div>
+      <div id="studentInfo" class="student-info"></div>
+      <div class="results-table">
+        <table>
+          <thead><tr><th>Subject</th><th>Score</th><th>Grade</th><th>Status</th></tr></thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      <div id="summaryArea" class="summary"></div>
+    </div>
+    <div class="remarks-card">
+      <h2>📝 Parent / Guardian Remarks</h2>
+      <textarea id="remarkInput" placeholder="Write your remark here..."></textarea>
+      <button id="submitRemarkBtn">💬 Submit Remark</button>
+      <h3>Previous Remarks</h3>
+      <div id="remarksList" class="remarks-list"></div>
+    </div>
+  </div>
+</div>
+<script>
+  // ---------- STUDENT DATA ----------
+  const studentsData = {
+    1: { name: "Aisha Mohamed", class: "Grade 8 - Alpha", results: [
+      { subject: "Mathematics", score: 84, grade: "A" }, { subject: "English", score: 72, grade: "B" },
+      { subject: "Kiswahili", score: 88, grade: "A" }, { subject: "Science", score: 91, grade: "A" },
+      { subject: "Social Studies", score: 65, grade: "C" }
+    ]},
+    2: { name: "Brian Omondi", class: "Grade 8 - Beta", results: [
+      { subject: "Mathematics", score: 56, grade: "D" }, { subject: "English", score: 68, grade: "C" },
+      { subject: "Kiswahili", score: 71, grade: "B" }, { subject: "Science", score: 48, grade: "E" },
+      { subject: "Social Studies", score: 62, grade: "C" }
+    ]},
+    3: { name: "Cynthia Wanjiku", class: "Grade 8 - Alpha", results: [
+      { subject: "Mathematics", score: 93, grade: "A" }, { subject: "English", score: 89, grade: "A" },
+      { subject: "Kiswahili", score: 94, grade: "A" }, { subject: "Science", score: 97, grade: "A" },
+      { subject: "Social Studies", score: 85, grade: "A" }
+    ]},
+    4: { name: "David Mwangi", class: "Grade 8 - Gamma", results: [
+      { subject: "Mathematics", score: 45, grade: "E" }, { subject: "English", score: 51, grade: "D" },
+      { subject: "Kiswahili", score: 47, grade: "E" }, { subject: "Science", score: 38, grade: "E" },
+      { subject: "Social Studies", score: 42, grade: "E" }
+    ]}
+  };
+
+  function getGradeClass(grade) {
+    const map = { A:'grade-A', B:'grade-B', C:'grade-C', D:'grade-D', E:'grade-E' };
+    return map[grade] || 'grade-E';
+  }
+  function getScoreStatus(score) {
+    if (score >= 80) return 'score-high';
+    if (score < 50) return 'score-low';
+    return '';
+  }
+  function computeSummary(results) {
+    let total = 0; results.forEach(r => total += r.score);
+    let avg = (total / results.length).toFixed(1);
+    let highest = Math.max(...results.map(r => r.score));
+    let lowest = Math.min(...results.map(r => r.score));
+    let gradeMap = {A:0,B:0,C:0,D:0,E:0};
+    results.forEach(r => gradeMap[r.grade]++);
+    return { avg, highest, lowest, gradeMap };
+  }
+
+  function getRemarks(studentId) {
+    const key = `remarks_student_${studentId}`;
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : [];
+  }
+  function saveRemark(studentId, remarkText) {
+    const remarks = getRemarks(studentId);
+    remarks.push({ text: remarkText, date: new Date().toLocaleString() });
+    localStorage.setItem(`remarks_student_${studentId}`, JSON.stringify(remarks));
+    return remarks;
+  }
+  function displayRemarks(studentId) {
+    const remarks = getRemarks(studentId);
+    const container = document.getElementById('remarksList');
+    if (remarks.length === 0) {
+      container.innerHTML = '<p style="color:#64748b;">No remarks yet.</p>';
+      return;
+    }
+    container.innerHTML = remarks.map(r => `
+      <div class="remark-item">
+        <div>💬 ${escapeHtml(r.text)}</div>
+        <div class="remark-date">📅 ${r.date}</div>
+      </div>
+    `).join('');
+  }
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function displayResults(studentId) {
+    const student = studentsData[studentId];
+    document.getElementById('studentInfo').innerHTML = `
+      <span class="student-detail">👩‍🎓 ${student.name}</span>
+      <span class="student-detail">📖 ${student.class}</span>
+      <span class="student-detail">📅 Term 1, 2025</span>`;
+    const tbody = document.getElementById('resultsBody');
+    tbody.innerHTML = '';
+    student.results.forEach(res => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerHTML = `<strong>${res.subject}</strong>`;
+      row.insertCell(1).innerHTML = `<span class="${getScoreStatus(res.score)}">${res.score}%</span>`;
+      row.insertCell(2).innerHTML = `<span class="${getGradeClass(res.grade)}">Grade ${res.grade}</span>`;
+      row.insertCell(3).innerHTML = res.score >= 75 ? '✅ Excellent' : (res.score >= 50 ? '⚠️ Average' : '❌ Needs Improvement');
+    });
+    const summary = computeSummary(student.results);
+    document.getElementById('summaryArea').innerHTML = `
+      <div class="summary-item"><div class="summary-label">Average</div><div class="summary-value">${summary.avg}%</div></div>
+      <div class="summary-item"><div class="summary-label">Highest</div><div class="summary-value">${summary.highest}%</div></div>
+      <div class="summary-item"><div class="summary-label">Lowest</div><div class="summary-value">${summary.lowest}%</div></div>
+      <div class="summary-item"><div class="summary-label">A's</div><div class="summary-value">${summary.gradeMap.A}</div></div>
+      <div class="summary-item"><div class="summary-label">Pass Rate</div><div class="summary-value">${Math.round((student.results.filter(r=>r.score>=50).length / student.results.length)*100)}%</div></div>`;
+    displayRemarks(studentId);
+  }
+
+  const loginSection = document.getElementById('loginSection');
+  const resultsSection = document.getElementById('resultsSection');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const studentSelect = document.getElementById('studentSelect');
+  const submitRemarkBtn = document.getElementById('submitRemarkBtn');
+  const remarkInput = document.getElementById('remarkInput');
+  let currentStudentId = null;
+
+  loginBtn.onclick = () => {
+    const val = studentSelect.value;
+    if (!val) return alert('Select a student');
+    currentStudentId = val;
+    displayResults(currentStudentId);
+    loginSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+    remarkInput.value = '';
+  };
+  logoutBtn.onclick = () => {
+    resultsSection.classList.add('hidden');
+    loginSection.classList.remove('hidden');
+    studentSelect.value = '';
+    currentStudentId = null;
+  };
+  submitRemarkBtn.onclick = () => {
+    if (!currentStudentId) return alert('Please log in first');
+    const text = remarkInput.value.trim();
+    if (!text) return alert('Write a remark');
+    saveRemark(currentStudentId, text);
+    displayRemarks(currentStudentId);
+    remarkInput.value = '';
+    submitRemarkBtn.innerText = '✅ Submitted!';
+    setTimeout(() => submitRemarkBtn.innerText = '💬 Submit Remark', 1500);
+  };
+</script>
+</body>
+</html>

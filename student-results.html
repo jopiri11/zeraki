@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Student Results + Parent Remarks | Like Zeraki</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .login-card, .results-card, .remarks-card {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      transition: all 0.2s ease;
+    }
+
+    .login-card h2, .results-card h2, .remarks-card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      color: #0f172a;
+      border-left: 5px solid #3b82f6;
+      padding-left: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+      color: #334155;
+    }
+
+    select, button, textarea {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+      border-radius: 16px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      font-family: inherit;
+    }
+
+    select:focus, textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      width: auto;
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+      margin-top: 0;
+    }
+
+    .logout-btn:hover {
+      background: #f1f5f9;
+      transform: none;
+    }
+
+    .student-info {
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .student-detail {
+      background: white;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .results-table {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    th {
+      background: #f1f5f9;
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .grade-A { background: #d1fae5; color: #065f46; font-weight: bold; border-radius: 40px; display: inline-block; padding: 0.25rem 1rem; }
+    .grade-B { background: #dbeafe; color: #1e40af; border-radius: 40px; display: inline-block; padding: 0.25rem 1rem; }
+    .grade-C { background: #fed7aa; color: #9a3412; border-radius: 40px; display: inline-block; padding: 0.25rem 1rem; }
+    .grade-D { background: #fecaca; color: #991b1b; border-radius: 40px; display: inline-block; padding: 0.25rem 1rem; }
+    .grade-E { background: #fee2e2; color: #7f1d1d; border-radius: 40px; display: inline-block; padding: 0.25rem 1rem; }
+
+    .score-high { font-weight: 700; color: #059669; }
+    .score-low { font-weight: 700; color: #dc2626; }
+
+    .summary {
+      background: #eff6ff;
+      padding: 1rem;
+      border-radius: 20px;
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .summary-item {
+      background: white;
+      border-radius: 16px;
+      padding: 0.75rem 1.5rem;
+      text-align: center;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .summary-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: #475569;
+    }
+
+    .summary-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* Remarks styling */
+    .remarks-list {
+      margin-top: 1rem;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .remark-item {
+      background: #f8fafc;
+      border-left: 4px solid #3b82f6;
+      padding: 0.8rem;
+      margin-bottom: 0.8rem;
+      border-radius: 12px;
+    }
+
+    .remark-text {
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .remark-date {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 0 1rem;
+      }
+      .login-card, .results-card, .remarks-card {
+        padding: 1.2rem;
+      }
+      th, td {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+      }
+      .summary-item {
+        min-width: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📚 Student Results Portal</h1>
+  <p>Like Zeraki – view performance & parents leave remarks</p>
+</div>
+
+<div class="container">
+  <!-- LOGIN SECTION -->
+  <div id="loginSection" class="login-card">
+    <h2>🔐 Student Login</h2>
+    <div class="form-group">
+      <label>Select your name</label>
+      <select id="studentSelect">
+        <option value="">-- Choose a student --</option>
+        <option value="1">Aisha Mohamed (Grade 8)</option>
+        <option value="2">Brian Omondi (Grade 8)</option>
+        <option value="3">Cynthia Wanjiku (Grade 8)</option>
+        <option value="4">David Mwangi (Grade 8)</option>
+      </select>
+    </div>
+    <button id="loginBtn">View My Results →</button>
+  </div>
+
+  <!-- RESULTS + REMARKS SECTION (hidden initially) -->
+  <div id="resultsSection" class="hidden">
+    <div class="results-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h2>📊 My Performance</h2>
+        <button id="logoutBtn" class="logout-btn">← Logout</button>
+      </div>
+      <div id="studentInfo" class="student-info"></div>
+      
+      <div class="results-table">
+        <table id="resultsTable">
+          <thead>
+            <tr><th>Subject</th><th>Score</th><th>Grade</th><th>Status</th></tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      <div id="summaryArea" class="summary"></div>
+    </div>
+
+    <!-- PARENT REMARKS CARD -->
+    <div class="remarks-card">
+      <h2>📝 Parent / Guardian Remarks</h2>
+      <textarea id="remarkInput" placeholder="Write your remark here... (e.g., Good effort in Maths, let's improve Science)"></textarea>
+      <button id="submitRemarkBtn">💬 Submit Remark</button>
+      
+      <div style="margin-top: 1.5rem;">
+        <h3>Previous Remarks</h3>
+        <div id="remarksList" class="remarks-list">
+          <p style="color: #64748b; text-align: center;">No remarks yet. Be the first to leave feedback.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 Student Performance Portal | Parent remarks are saved locally per student.
+</footer>
+
+<script>
+  // ---------- MOCK DATA: Students and their results ----------
+  const studentsData = {
+    1: {
+      name: "Aisha Mohamed",
+      class: "Grade 8 - Alpha",
+      results: [
+        { subject: "Mathematics", score: 84, grade: "A" },
+        { subject: "English", score: 72, grade: "B" },
+        { subject: "Kiswahili", score: 88, grade: "A" },
+        { subject: "Science", score: 91, grade: "A" },
+        { subject: "Social Studies", score: 65, grade: "C" }
+      ]
+    },
+    2: {
+      name: "Brian Omondi",
+      class: "Grade 8 - Beta",
+      results: [
+        { subject: "Mathematics", score: 56, grade: "D" },
+        { subject: "English", score: 68, grade: "C" },
+        { subject: "Kiswahili", score: 71, grade: "B" },
+        { subject: "Science", score: 48, grade: "E" },
+        { subject: "Social Studies", score: 62, grade: "C" }
+      ]
+    },
+    3: {
+      name: "Cynthia Wanjiku",
+      class: "Grade 8 - Alpha",
+      results: [
+        { subject: "Mathematics", score: 93, grade: "A" },
+        { subject: "English", score: 89, grade: "A" },
+        { subject: "Kiswahili", score: 94, grade: "A" },
+        { subject: "Science", score: 97, grade: "A" },
+        { subject: "Social Studies", score: 85, grade: "A" }
+      ]
+    },
+    4: {
+      name: "David Mwangi",
+      class: "Grade 8 - Gamma",
+      results: [
+        { subject: "Mathematics", score: 45, grade: "E" },
+        { subject: "English", score: 51, grade: "D" },
+        { subject: "Kiswahili", score: 47, grade: "E" },
+        { subject: "Science", score: 38, grade: "E" },
+        { subject: "Social Studies", score: 42, grade: "E" }
+      ]
+    }
+  };
+
+  // ---------- Helper functions ----------
+  function getGradeClass(grade) {
+    switch(grade) {
+      case 'A': return 'grade-A';
+      case 'B': return 'grade-B';
+      case 'C': return 'grade-C';
+      case 'D': return 'grade-D';
+      default: return 'grade-E';
+    }
+  }
+
+  function getScoreStatus(score) {
+    if(score >= 80) return 'score-high';
+    if(score < 50) return 'score-low';
+    return '';
+  }
+
+  function computeSummary(results) {
+    let total = 0;
+    results.forEach(r => total += r.score);
+    let avg = (total / results.length).toFixed(1);
+    let highest = Math.max(...results.map(r => r.score));
+    let lowest = Math.min(...results.map(r => r.score));
+    let gradeMap = {A:0, B:0, C:0, D:0, E:0};
+    results.forEach(r => gradeMap[r.grade]++);
+    return { avg, highest, lowest, gradeMap };
+  }
+
+  // ---------- Remarks Storage (localStorage per student) ----------
+  function getRemarks(studentId) {
+    const key = `remarks_student_${studentId}`;
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  function saveRemark(studentId, remarkText) {
+    const remarks = getRemarks(studentId);
+    const newRemark = {
+      text: remarkText,
+      date: new Date().toLocaleString()
+    };
+    remarks.push(newRemark);
+    localStorage.setItem(`remarks_student_${studentId}`, JSON.stringify(remarks));
+    return remarks;
+  }
+
+  function displayRemarks(studentId) {
+    const remarks = getRemarks(studentId);
+    const container = document.getElementById('remarksList');
+    if (remarks.length === 0) {
+      container.innerHTML = '<p style="color: #64748b; text-align: center;">No remarks yet. Be the first to leave feedback.</p>';
+      return;
+    }
+    container.innerHTML = remarks.map(r => `
+      <div class="remark-item">
+        <div class="remark-text">💬 ${escapeHtml(r.text)}</div>
+        <div class="remark-date">📅 ${r.date}</div>
+      </div>
+    `).join('');
+  }
+
+  // simple XSS prevention
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+      return c;
+    });
+  }
+
+  // Render results dashboard
+  function displayResults(studentId) {
+    const student = studentsData[studentId];
+    if (!student) return;
+
+    // Student info
+    const studentInfoDiv = document.getElementById('studentInfo');
+    studentInfoDiv.innerHTML = `
+      <span class="student-detail">👩‍🎓 ${student.name}</span>
+      <span class="student-detail">📖 ${student.class}</span>
+      <span class="student-detail">📅 Term 1, 2025 Exams</span>
+    `;
+
+    // Results table
+    const tbody = document.getElementById('resultsBody');
+    tbody.innerHTML = '';
+    student.results.forEach(res => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerHTML = `<strong>${res.subject}</strong>`;
+      row.insertCell(1).innerHTML = `<span class="${getScoreStatus(res.score)}">${res.score}%</span>`;
+      row.insertCell(2).innerHTML = `<span class="${getGradeClass(res.grade)}">Grade ${res.grade}</span>`;
+      row.insertCell(3).innerHTML = res.score >= 75 ? '✅ Excellent' : (res.score >= 50 ? '⚠️ Average' : '❌ Needs Improvement');
+    });
+
+    // Summary stats
+    const summary = computeSummary(student.results);
+    const summaryDiv = document.getElementById('summaryArea');
+    summaryDiv.innerHTML = `
+      <div class="summary-item"><div class="summary-label">Average Score</div><div class="summary-value">${summary.avg}%</div></div>
+      <div class="summary-item"><div class="summary-label">Highest</div><div class="summary-value">${summary.highest}%</div></div>
+      <div class="summary-item"><div class="summary-label">Lowest</div><div class="summary-value">${summary.lowest}%</div></div>
+      <div class="summary-item"><div class="summary-label">A's</div><div class="summary-value">${summary.gradeMap.A}</div></div>
+      <div class="summary-item"><div class="summary-label">Pass Rate</div><div class="summary-value">${Math.round((student.results.filter(r=>r.score>=50).length / student.results.length)*100)}%</div></div>
+    `;
+
+    // Load and display remarks for this student
+    displayRemarks(studentId);
+  }
+
+  // ---------- DOM Elements ----------
+  const loginSection = document.getElementById('loginSection');
+  const resultsSection = document.getElementById('resultsSection');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const studentSelect = document.getElementById('studentSelect');
+  const submitRemarkBtn = document.getElementById('submitRemarkBtn');
+  const remarkInput = document.getElementById('remarkInput');
+
+  let currentStudentId = null;
+
+  // Login
+  loginBtn.addEventListener('click', () => {
+    const selectedValue = studentSelect.value;
+    if (!selectedValue) {
+      alert('Please select a student to view results.');
+      return;
+    }
+    currentStudentId = selectedValue;
+    displayResults(currentStudentId);
+    loginSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+    remarkInput.value = ''; // clear remark field
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click', () => {
+    resultsSection.classList.add('hidden');
+    loginSection.classList.remove('hidden');
+    studentSelect.value = '';
+    currentStudentId = null;
+  });
+
+  // Submit remark
+  submitRemarkBtn.addEventListener('click', () => {
+    if (!currentStudentId) {
+      alert('Please log in first.');
+      return;
+    }
+    const remarkText = remarkInput.value.trim();
+    if (!remarkText) {
+      alert('Please write a remark before submitting.');
+      return;
+    }
+    saveRemark(currentStudentId, remarkText);
+    displayRemarks(currentStudentId);
+    remarkInput.value = ''; // clear after submit
+    // Optional: show a small success indicator
+    const btn = submitRemarkBtn;
+    const originalText = btn.innerText;
+    btn.innerText = '✅ Submitted!';
+    setTimeout(() => { btn.innerText = originalText; }, 1500);
+  });
+
+  // optional: allow Enter in textarea? Not needed for UX.
+</script>
+</body>
+</html>

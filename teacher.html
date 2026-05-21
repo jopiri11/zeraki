@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard - VunaSoko Results</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #1e293b;
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      background: #3b82f6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      text-decoration: none;
+    }
+    .container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
+    .dashboard-card {
+      background: white;
+      border-radius: 24px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+    h2 { border-left: 5px solid #3b82f6; padding-left: 1rem; margin-bottom: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f1f5f9; }
+    .student-row { cursor: pointer; transition: background 0.2s; }
+    .student-row:hover { background: #f8fafc; }
+    .remarks-panel {
+      margin-top: 1.5rem;
+      border-top: 2px solid #e2e8f0;
+      padding-top: 1rem;
+    }
+    .remarks-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+    .remark-item {
+      background: #f8fafc;
+      border-left: 4px solid #3b82f6;
+      padding: 0.8rem;
+      margin-bottom: 0.8rem;
+      border-radius: 12px;
+    }
+    .remark-date { font-size: 0.7rem; color: #64748b; }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .grade-A { background: #d1fae5; color: #065f46; }
+    .grade-B { background: #dbeafe; color: #1e40af; }
+    .grade-C { background: #fed7aa; color: #9a3412; }
+    .grade-D, .grade-E { background: #fecaca; color: #991b1b; }
+    @media (max-width: 768px) {
+      th, td { font-size: 0.8rem; padding: 0.5rem; }
+      .container { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>👩‍🏫 Teacher Dashboard</h1>
+  <a href="student.html" class="nav-link">← Student Portal</a>
+</div>
+<div class="container">
+  <div class="dashboard-card">
+    <h2>📈 All Students Performance</h2>
+    <div style="overflow-x: auto;">
+      <table id="studentsTable">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Class</th>
+            <th>Average %</th>
+            <th>Highest Score</th>
+            <th>Lowest Score</th>
+            <th>Top Subject</th>
+          </tr>
+        </thead>
+        <tbody id="studentsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="dashboard-card">
+    <h2>📝 Parent Remarks by Student</h2>
+    <div style="margin-bottom: 1rem;">
+      <label for="remarkStudentSelect">Select a student:</label>
+      <select id="remarkStudentSelect" style="width: auto; margin-left: 1rem; padding: 0.4rem 1rem;">
+        <option value="">-- Choose --</option>
+      </select>
+    </div>
+    <div id="teacherRemarksPanel">
+      <p style="color: #64748b;">Select a student to view all parent remarks.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Same student data as in student.html
+  const studentsData = {
+    1: { name: "Aisha Mohamed", class: "Grade 8 - Alpha", results: [
+      { subject: "Mathematics", score: 84, grade: "A" }, { subject: "English", score: 72, grade: "B" },
+      { subject: "Kiswahili", score: 88, grade: "A" }, { subject: "Science", score: 91, grade: "A" },
+      { subject: "Social Studies", score: 65, grade: "C" }
+    ]},
+    2: { name: "Brian Omondi", class: "Grade 8 - Beta", results: [
+      { subject: "Mathematics", score: 56, grade: "D" }, { subject: "English", score: 68, grade: "C" },
+      { subject: "Kiswahili", score: 71, grade: "B" }, { subject: "Science", score: 48, grade: "E" },
+      { subject: "Social Studies", score: 62, grade: "C" }
+    ]},
+    3: { name: "Cynthia Wanjiku", class: "Grade 8 - Alpha", results: [
+      { subject: "Mathematics", score: 93, grade: "A" }, { subject: "English", score: 89, grade: "A" },
+      { subject: "Kiswahili", score: 94, grade: "A" }, { subject: "Science", score: 97, grade: "A" },
+      { subject: "Social Studies", score: 85, grade: "A" }
+    ]},
+    4: { name: "David Mwangi", class: "Grade 8 - Gamma", results: [
+      { subject: "Mathematics", score: 45, grade: "E" }, { subject: "English", score: 51, grade: "D" },
+      { subject: "Kiswahili", score: 47, grade: "E" }, { subject: "Science", score: 38, grade: "E" },
+      { subject: "Social Studies", score: 42, grade: "E" }
+    ]}
+  };
+
+  function getGradeClass(grade) {
+    return grade === 'A' ? 'grade-A' : (grade === 'B' ? 'grade-B' : (grade === 'C' ? 'grade-C' : 'grade-D'));
+  }
+
+  function getTopSubject(results) {
+    let top = results.reduce((max, r) => r.score > max.score ? r : max, results[0]);
+    return `${top.subject} (${top.score}%)`;
+  }
+
+  function renderStudentTable() {
+    const tbody = document.getElementById('studentsTableBody');
+    tbody.innerHTML = '';
+    for (const [id, student] of Object.entries(studentsData)) {
+      const scores = student.results.map(r => r.score);
+      const avg = (scores.reduce((a,b)=>a+b,0) / scores.length).toFixed(1);
+      const highest = Math.max(...scores);
+      const lowest = Math.min(...scores);
+      const topSubj = getTopSubject(student.results);
+      const row = tbody.insertRow();
+      row.classList.add('student-row');
+      row.setAttribute('data-id', id);
+      row.insertCell(0).innerHTML = student.name;
+      row.insertCell(1).innerHTML = student.class;
+      row.insertCell(2).innerHTML = `<strong>${avg}%</strong>`;
+      row.insertCell(3).innerHTML = highest + '%';
+      row.insertCell(4).innerHTML = lowest + '%';
+      row.insertCell(5).innerHTML = topSubj;
+      row.addEventListener('click', () => {
+        document.getElementById('remarkStudentSelect').value = id;
+        showRemarksForStudent(id);
+      });
+    }
+  }
+
+  function getRemarks(studentId) {
+    const key = `remarks_student_${studentId}`;
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  function showRemarksForStudent(studentId) {
+    const remarks = getRemarks(studentId);
+    const student = studentsData[studentId];
+    const panel = document.getElementById('teacherRemarksPanel');
+    if (!student) {
+      panel.innerHTML = '<p style="color:#64748b;">Invalid student.</p>';
+      return;
+    }
+    if (remarks.length === 0) {
+      panel.innerHTML = `<p style="color:#64748b;">No parent remarks for ${student.name} yet.</p>`;
+      return;
+    }
+    panel.innerHTML = `
+      <h3>Remarks for ${student.name}</h3>
+      <div class="remarks-list">
+        ${remarks.map(r => `
+          <div class="remark-item">
+            <div>💬 ${escapeHtml(r.text)}</div>
+            <div class="remark-date">📅 ${r.date}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function populateStudentSelect() {
+    const select = document.getElementById('remarkStudentSelect');
+    select.innerHTML = '<option value="">-- Choose a student --</option>';
+    for (const [id, student] of Object.entries(studentsData)) {
+      const option = document.createElement('option');
+      option.value = id;
+      option.textContent = `${student.name} (${student.class})`;
+      select.appendChild(option);
+    }
+    select.addEventListener('change', (e) => {
+      if (e.target.value) {
+        showRemarksForStudent(e.target.value);
+      } else {
+        document.getElementById('teacherRemarksPanel').innerHTML = '<p style="color:#64748b;">Select a student to view all parent remarks.</p>';
+      }
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  renderStudentTable();
+  populateStudentSelect();
+</script>
+</body>
+</html>
